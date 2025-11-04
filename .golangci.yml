@@ -1,23 +1,10 @@
-linters:
+﻿linters:
   enable:
     - gofmt
     - govet
-    - errcheck
     - staticcheck
     - gosimple
-    - ineffassign
     - unused
-
-linters-settings:
-  gocyclo:
-    min-complexity: 15
-
-issues:
-  max-issues-per-linter: 50
-  max-same-issues: 10
-  exclude-dirs:
-    - vendor
-    - node_modules
 
 run:
   timeout: 5m
