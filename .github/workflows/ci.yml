@@ -1,32 +1,96 @@
-name: CI Pipeline
+name: CI Pipelinename: CI Pipeline
 
-on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
 
-jobs:
-  build:
+
+on:on:
+
+  push:  push:
+
+    branches: [ main, master ]    branches: [ main, master ]
+
+  pull_request:  pull_request:
+
+    branches: [ main, master ]    branches: [ main, master ]
+
+
+
+jobs:jobs:
+
+  lint:  build:
+
+    name: Lint check    runs-on: ubuntu-latest
+
     runs-on: ubuntu-latest
 
+    steps:    steps:
+
+      - name: Checkout repository      - name: Checkout repository
+
+        uses: actions/checkout@v4        uses: actions/checkout@v4
+
+        with:
+
+          submodules: recursive      - name: Set up Go
+
+        uses: actions/setup-go@v5
+
+      - name: Set up Go        with:
+
+        uses: actions/setup-go@v5          go-version: '1.20'
+
+        with:
+
+          go-version: '1.21'      - name: Install dependencies
+
+        working-directory: ./src
+
+      - name: golangci-lint        run: go mod tidy
+
+        uses: golangci/golangci-lint-action@v6
+
+        with:      - name: Build free5gc
+
+          version: latest        working-directory: ./src
+
+          working-directory: ./test        run: go build ./...
+
+          args: --timeout=5m
+
+      - name: Run tests
+
+  build-and-test:        working-directory: ./src
+
+    name: Build and Unit Test        run: go test ./... -v
+
+    runs-on: ubuntu-latest
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.20'
+          go-version: '1.21'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential
 
       - name: Install dependencies
-        working-directory: ./src
-        run: go mod tidy
+        working-directory: ./test
+        run: go mod download
 
-      - name: Build free5gc
-        working-directory: ./src
+      - name: Build NFs
+        run: make
+
+      - name: Build test
+        working-directory: ./test
         run: go build ./...
 
-      - name: Run tests
-        working-directory: ./src
-        run: go test ./... -v
+      - name: Run unit tests
+        working-directory: ./test
+        run: go test -v -short ./...
