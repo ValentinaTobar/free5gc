@@ -1,67 +1,35 @@
-name: CI Pipelinename: CI Pipeline
+﻿name: CI Pipeline
 
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 
-
-on:on:
-
-  push:  push:
-
-    branches: [ main, master ]    branches: [ main, master ]
-
-  pull_request:  pull_request:
-
-    branches: [ main, master ]    branches: [ main, master ]
-
-
-
-jobs:jobs:
-
-  lint:  build:
-
-    name: Lint check    runs-on: ubuntu-latest
-
+jobs:
+  lint:
+    name: Lint check
     runs-on: ubuntu-latest
-
-    steps:    steps:
-
-      - name: Checkout repository      - name: Checkout repository
-
-        uses: actions/checkout@v4        uses: actions/checkout@v4
-
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
+          submodules: recursive
 
-          submodules: recursive      - name: Set up Go
-
+      - name: Set up Go
         uses: actions/setup-go@v5
-
-      - name: Set up Go        with:
-
-        uses: actions/setup-go@v5          go-version: '1.20'
-
         with:
+          go-version: '1.21'
 
-          go-version: '1.21'      - name: Install dependencies
-
-        working-directory: ./src
-
-      - name: golangci-lint        run: go mod tidy
-
+      - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
-
-        with:      - name: Build free5gc
-
-          version: latest        working-directory: ./src
-
-          working-directory: ./test        run: go build ./...
-
+        with:
+          version: latest
+          working-directory: ./test
           args: --timeout=5m
 
-      - name: Run tests
-
-  build-and-test:        working-directory: ./src
-
-    name: Build and Unit Test        run: go test ./... -v
-
+  build-and-test:
+    name: Build and Unit Test
     runs-on: ubuntu-latest
     
     steps:
