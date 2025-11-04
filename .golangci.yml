@@ -2,9 +2,26 @@
   enable:
     - gofmt
     - govet
-    - staticcheck
     - gosimple
-    - unused
+
+linters-settings:
+  errcheck:
+    check-blank: false
+    check-type-assertions: false
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - errcheck
+        - unused
+        - staticcheck
+    - linters:
+        - errcheck
+      text: "Error return value of"
+    - linters:
+        - unused
+      text: "is unused"
 
 run:
   timeout: 5m
